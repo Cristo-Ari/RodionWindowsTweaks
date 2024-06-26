@@ -1,0 +1,1 @@
+powershell.exe -File "rescycleBinDesktopIconManager.ps1" -Action hide
