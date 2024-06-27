@@ -1,32 +1,29 @@
-﻿#нужно для того, чтобы можно было запустить файл с параметрами
-param (
-    [ValidateSet("show","hide")]
+﻿param (
+    [ValidateSet("show", "hide", "status")]
     [string]$Action
 )
 
 function refresh-desktop {
-# c# скрипт, который добавляет функцию RefreshDesktop (любое изменение внутри @"..."@ и после приводыт к вылету )
-Add-Type (
-@"
+    Add-Type (
+    @"
 using System;
 using System.Runtime.InteropServices;
 public class RefreshDesktop {
     [DllImport("shell32.dll")] public static extern void SHChangeNotify(int wEventId, int uFlags, IntPtr dwItem1, IntPtr dwItem2);
 }
 "@
-)
-[RefreshDesktop]::SHChangeNotify(0x8000000, 0x1000, [IntPtr]::Zero, [IntPtr]::Zero)
-
+    )
+    [RefreshDesktop]::SHChangeNotify(0x8000000, 0x1000, [IntPtr]::Zero, [IntPtr]::Zero)
 }
 
 function hide-recycle-bin {
     reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{645FF040-5081-101B-9F08-00AA002F954E}" /t REG_DWORD /d 1 /f
-    Refresh-Desktop
+    refresh-desktop
 }
 
 function show-recycle-bin {
     reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{645FF040-5081-101B-9F08-00AA002F954E}" /t REG_DWORD /d 0 /f
-    Refresh-Desktop
+    refresh-desktop
 }
 
 function isRecycleBinShowing {
@@ -44,17 +41,31 @@ function isRecycleBinShowing {
     }
 }
 
+function print-recycle-bin-state {
+    if (isRecycleBinShowing) {
+        Write-Output "Сейчас отображена иконка корзины"
+    } else {
+        Write-Output "Сейчас скрыта иконка корзины"
+    }
+}
+
 function runRecycleBinManager {
     do {
-        Write-Output $(if (isRecycleBinShowing) { "Сейчас отображена иконка корзины" } else { "Сейчас скрыта иконка корзины" })
-        switch (Read-Host "1- Показать корзину  2- Скрыть корзину") {
+        print-recycle-bin-state
+        switch (Read-Host "1- Показать корзину  2- Скрыть корзину  3- Проверить состояние  0- Выход") {
             1 {
                 show-recycle-bin
             }
             2 {
                 hide-recycle-bin
             }
-            default  {
+            3 {
+                print-recycle-bin-state
+            }
+            0 {
+                return
+            }
+            default {
                 return
             }
         }
@@ -65,6 +76,8 @@ if ($Action -eq "show") {
     show-recycle-bin
 } elseif ($Action -eq "hide") {
     hide-recycle-bin
+} elseif ($Action -eq "status") {
+    print-recycle-bin-state
 } else {
     runRecycleBinManager
 }
