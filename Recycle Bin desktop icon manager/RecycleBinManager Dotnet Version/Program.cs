@@ -24,6 +24,10 @@ namespace RecycleBinManager
                 {
                     HideRecycleBin();
                 }
+                else if (args[0].Equals("status", StringComparison.OrdinalIgnoreCase))
+                {
+                    PrintRecycleBinState();
+                }
                 else
                 {
                     RunRecycleBinManager();
@@ -75,12 +79,17 @@ namespace RecycleBinManager
             return false;
         }
 
+        static void PrintRecycleBinState()
+        {
+            Console.WriteLine(IsRecycleBinShowing() ? "Сейчас отображена иконка корзины" : "Сейчас скрыта иконка корзины");
+        }
+
         static void RunRecycleBinManager()
         {
             while (true)
             {
-                Console.WriteLine(IsRecycleBinShowing() ? "Сейчас отображена иконка корзины" : "Сейчас скрыта иконка корзины");
-                Console.WriteLine("1- Показать корзину  2- Скрыть корзину  0- Выход");
+                PrintRecycleBinState();
+                Console.WriteLine("1- Показать корзину  2- Скрыть корзину  3- Проверить состояние  0- Выход");
                 string choice = Console.ReadLine();
 
                 if (choice == "1")
@@ -90,6 +99,10 @@ namespace RecycleBinManager
                 else if (choice == "2")
                 {
                     HideRecycleBin();
+                }
+                else if (choice == "3")
+                {
+                    PrintRecycleBinState();
                 }
                 else if (choice == "0")
                 {
